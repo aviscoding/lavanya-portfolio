@@ -406,8 +406,8 @@ export default function Portfolio() {
 
         {/* TAIL ANIMATION */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-          <Image unoptimized src="/tail_1.png" alt="tail" fill style={{ objectFit: 'contain', opacity: tailFrame === 0 ? 1 : 0, transition: 'opacity 0.9s ease', pointerEvents: 'none' }} />
-          <Image unoptimized src="/tail_2.png" alt="tail" fill style={{ objectFit: 'contain', opacity: tailFrame === 1 ? 1 : 0, transition: 'opacity 0.9s ease', pointerEvents: 'none' }} />
+          <Image unoptimized src="/tail_1.PNG" alt="tail" fill style={{ objectFit: 'contain', opacity: tailFrame === 0 ? 1 : 0, transition: 'opacity 0.9s ease', pointerEvents: 'none' }} />
+          <Image unoptimized src="/tail_2.PNG" alt="tail" fill style={{ objectFit: 'contain', opacity: tailFrame === 1 ? 1 : 0, transition: 'opacity 0.9s ease', pointerEvents: 'none' }} />
         </div>
 
         {/* CAT BODY */}
@@ -417,7 +417,7 @@ export default function Portfolio() {
 
         {/* CAT EYES */}
         <div style={{ position: 'absolute', inset: 0, opacity: catAwake ? 1 : 0, transition: 'opacity 0.5s ease', pointerEvents: 'none' }}>
-          <Image unoptimized src="/cat_eyes.png" alt="cat eyes" fill style={{ objectFit: 'contain', pointerEvents: 'none' }} />
+          <Image unoptimized src="/cat_eyes.PNG" alt="cat eyes" fill style={{ objectFit: 'contain', pointerEvents: 'none' }} />
         </div>
 
         {/* COOL SKETCHES — same hover pop-up treatment as the books,
