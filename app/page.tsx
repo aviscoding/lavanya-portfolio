@@ -141,7 +141,7 @@ const BOOK_HITBOXES: Record<string, { left: number; top: number; width: number; 
   lavanya:         { left: 593,  top: 1232, width: 80,  height: 200 },
   quick_view:      { left: 656,  top: 1221, width: 90,  height: 200 },
   fun_facts:       { left: 771,  top: 1338, width: 220, height: 80 },
-  inspirations:    { left: 756,  top: 1388, width: 240, height: 85 },
+  inspirations:    { left: 700,  top: 1360, width: 320, height: 140 },
   erzing:          { left: 1054, top: 1208, width: 90,  height: 210 },
   linkedin:        { left: 1124, top: 1361, width: 260, height: 95 },
   skills:          { left: 1379, top: 1200, width: 110, height: 230 },
@@ -229,9 +229,17 @@ export default function Portfolio() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
     // Resolves to null (instead of hanging forever) if a given book's image
-    // never loads within 4s — e.g. a filename mismatch or missing file.
-    // This means ONE broken image only disables that one book, instead of
-    // silently freezing clicks/hover for every book on the shelf.
+    // never becomes truly ready within 4s — e.g. a filename mismatch or
+    // missing file. This means ONE broken image only disables that one
+    // book, instead of silently freezing clicks/hover for every book.
+    //
+    // IMPORTANT: `.complete && .naturalWidth > 0` is NOT a reliable signal
+    // that an image's actual pixel data is safe to read yet — both can be
+    // true slightly before decoding fully finishes, causing intermittent,
+    // hard-to-reproduce failures (a different random book "not working"
+    // on different page loads/refreshes). We use the image's real decode()
+    // promise instead, which only resolves once pixel data is guaranteed
+    // ready — this removes that race condition entirely.
     const waitForRenderedImg = (bookId: string): Promise<HTMLImageElement | null> =>
       new Promise((resolve) => {
         let done = false;
@@ -239,14 +247,19 @@ export default function Portfolio() {
           if (!done) { done = true; resolve(result); }
         };
         const timeoutId = setTimeout(() => {
-          console.warn(`[hit-detection] "${bookId}" image never loaded — check its filename/casing in /public. This book will not be clickable until fixed.`);
+          console.warn(`[hit-detection] "${bookId}" image never became ready — check its filename/casing in /public. This book will not be clickable until fixed.`);
           finish(null);
         }, 4000);
         const tryFind = () => {
           if (done) return;
           const el = document.querySelector<HTMLImageElement>(`img[alt="${bookId}"]`);
-          if (el && el.complete && el.naturalWidth > 0) { clearTimeout(timeoutId); finish(el); }
-          else requestAnimationFrame(tryFind);
+          if (el && el.complete && el.naturalWidth > 0) {
+            el.decode()
+              .then(() => { clearTimeout(timeoutId); finish(el); })
+              .catch(() => { clearTimeout(timeoutId); finish(el); }); // still usable even if decode() itself errors
+          } else {
+            requestAnimationFrame(tryFind);
+          }
         };
         tryFind();
       });
